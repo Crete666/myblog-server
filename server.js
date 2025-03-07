@@ -45,6 +45,54 @@ app.get("/boards", (req, res) => {
     });
 });
 
+app.get("/boards/:id", (req, res) => {
+  const params = req.params;
+  const { id } = params;
+  models.Board.findOne({
+    where: {
+      id: id,
+    },
+  })
+    .then((result) => {
+      console.log("BOARD : ", result);
+      res.send({
+        board: result,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(400).send("게시글 불러오기 에러 발생");
+    });
+});
+
+app.get("/boardRecently", async (req, res) => {
+  var id = 0;
+  await models.Board.max("id")
+    .then((result) => {
+      id = result;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  models.Board.findOne({
+    where: {
+      id: parseInt(id),
+    },
+  })
+    .then((result) => {
+      console.log("BOARD : ", result);
+      res.send({
+        board: result,
+        id: id,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.send("게시글 불러오기 에러 발생");
+    });
+});
+
 app.get("/projects", (req, res) => {
   models.Project.findAll({
     order: [["createdAt", "DESC"]],
@@ -58,7 +106,7 @@ app.get("/projects", (req, res) => {
     })
     .catch((error) => {
       console.error(error);
-      res.send("프로젝트 불러오기 에러 발생");
+      res.status(400).send("프로젝트 불러오기 에러 발생");
     });
 });
 
