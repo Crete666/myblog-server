@@ -94,14 +94,23 @@ app.get("/boardRecently", async (req, res) => {
 });
 
 app.get("/projects", (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1;
+  const limit = 3;
+  var total = 0;
+  models.Project.count().then((count) => {
+    total = count;
+  });
   models.Project.findAll({
     order: [["createdAt", "DESC"]],
     attributes: ["name", "imageUrl", "hubUrl"],
+    offset: (page - 1) * limit,
+    limit: limit,
   })
     .then((result) => {
       console.log("PROJECT : ", result);
       res.send({
         projects: result,
+        totalCount: total,
       });
     })
     .catch((error) => {
